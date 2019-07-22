@@ -28,7 +28,7 @@ impl Core {
         println!("Shutdown core node...");
     }
 
-    fn get_state(&self) -> State {
-        *self.state
+    fn get_state(&self) -> &State {
+        &self.state
     }
 }

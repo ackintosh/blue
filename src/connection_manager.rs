@@ -1,25 +1,26 @@
 use std::net::{TcpListener, TcpStream};
 use std::io::Read;
+use crate::message::parse;
 
 struct Node(String, String);
 
-struct ConnectionManager {
+pub struct ConnectionManager {
     host: String,
     port: String,
     nodes: Vec<Node>,
 }
 
 impl ConnectionManager {
-    fn new(host: String, port: String) -> Self {
+    pub fn new(host: String, port: String) -> Self {
         println!("Initializing connection manager...");
         Self {
-            host,
-            port,
-            nodes: vec![Node(host, port)]
+            host: host.clone(),
+            port: port.clone(),
+            nodes: vec![Node(host.clone(), port.clone())]
         }
     }
 
-    fn start(&self) {
+    pub fn start(&self) {
         let listener = TcpListener::bind(format!("{}:{}", self.host, self.port)).unwrap();
 
         for stream in listener.incoming() {
@@ -30,7 +31,10 @@ impl ConnectionManager {
     fn handle_connection(mut stream: TcpStream) {
         let mut buffer = [0; 512];
 
-        stream.read(&buffer).unwrap();
-        println!("Request: {}", String::from_utf8_lossy(&buffer[..]));
+        let size = stream.read(&mut buffer).unwrap();
+        let s = String::from_utf8_lossy(&buffer[..size]).to_string();
+        let m = parse(&s);
+
+        println!("Message: {:?}", m);
     }
 }
