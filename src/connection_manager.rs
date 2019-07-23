@@ -1,6 +1,6 @@
 use std::net::{TcpListener, TcpStream};
-use std::io::Read;
-use crate::message::{parse, Type};
+use std::io::{Read, Write};
+use crate::message::{parse, Type, Message};
 use std::collections::HashSet;
 
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Hash)]
@@ -56,6 +56,23 @@ impl ConnectionManager {
                 println!("Removed the node from core node list: {:?}", node);
                 self.nodes.remove(&node);
                 println!("Core nodes: {:?}", self.nodes);
+            }
+        }
+    }
+
+    fn send_msg(node: &Node, msg: &Message) {
+        println!("Sending message: {:?}", msg);
+        match TcpStream::connect(format!("{}:{}", node.0, node.1)) {
+            Ok(mut stream) => {
+                println!("Successfully connected to the node: {:?}", node);
+
+                match stream.write(serde_json::to_string(&msg).unwrap().as_bytes()) {
+                    Ok(size) => println!("Sent {} bytes", size),
+                    Err(e) => println!("Failed to send message: {:?}", e)
+                }
+            }
+            Err(e) => {
+                println!("Failed to connect to the node: {:?}", node);
             }
         }
     }
