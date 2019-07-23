@@ -6,4 +6,4 @@ extern crate serde_json;
 
 mod core;
 pub mod connection_manager;
-mod message;
+pub mod message;

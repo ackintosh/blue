@@ -1,7 +1,13 @@
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Message {
-    r#type: String,
-    source_port: String,
+    pub r#type: Type,
+    pub source_port: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum Type {
+    Add,
+    Remove,
 }
 
 pub fn parse(s: &String) -> Message {
