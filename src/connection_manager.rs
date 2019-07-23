@@ -51,8 +51,12 @@ impl ConnectionManager {
                 self.nodes.insert(node);
                 println!("Core nodes: {:?}", self.nodes);
             }
-            // TODO: Remove
-            _ => {}
+            Type::Remove => {
+                let node = Node("127.0.0.1".to_owned(), m.source_port);
+                println!("Removed the node from core node list: {:?}", node);
+                self.nodes.remove(&node);
+                println!("Core nodes: {:?}", self.nodes);
+            }
         }
     }
 }
