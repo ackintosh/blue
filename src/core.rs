@@ -1,3 +1,5 @@
+use crate::connection_manager::ConnectionManager;
+
 enum State {
     Init,
     Standby,
@@ -5,18 +7,23 @@ enum State {
     ShuttingDown,
 }
 
-struct Core {
+pub struct Core {
     state: State,
+    cm: ConnectionManager,
 }
 
 impl Core {
-    fn new() -> Self {
+    pub fn new(host: String, port: String) -> Self {
         println!("Initializing core node...");
-        Self { state: State::Init }
+        Self {
+            state: State::Init,
+            cm: ConnectionManager::new(host.clone(), port.clone()),
+        }
     }
 
-    fn start(&mut self) {
+    pub fn start(&mut self) {
         self.state = State::Standby;
+        self.cm.start();
     }
 
     fn join_network(&mut self) {

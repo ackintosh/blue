@@ -14,7 +14,7 @@ pub struct ConnectionManager {
 
 impl ConnectionManager {
     pub fn new(host: String, port: String) -> Self {
-        print!("Initializing connection manager... ");
+        println!("Initializing connection manager...");
 
         let mut c = Self {
             host: host.clone(),
@@ -22,8 +22,6 @@ impl ConnectionManager {
             nodes: HashSet::new()
         };
         c.nodes.insert(Node(host.clone(), port.clone()));
-
-        println!("done.");
         c
     }
 
