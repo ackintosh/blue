@@ -1,24 +1,30 @@
 use std::net::{TcpListener, TcpStream};
 use std::io::Read;
 use crate::message::{parse, Type};
+use std::collections::HashSet;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Hash)]
 struct Node(String, String);
 
 pub struct ConnectionManager {
     host: String,
     port: String,
-    nodes: Vec<Node>,
+    nodes: HashSet<Node>,
 }
 
 impl ConnectionManager {
     pub fn new(host: String, port: String) -> Self {
-        println!("Initializing connection manager...");
-        Self {
+        print!("Initializing connection manager... ");
+
+        let mut c = Self {
             host: host.clone(),
             port: port.clone(),
-            nodes: vec![Node(host.clone(), port.clone())]
-        }
+            nodes: HashSet::new()
+        };
+        c.nodes.insert(Node(host.clone(), port.clone()));
+
+        println!("done.");
+        c
     }
 
     pub fn start(&mut self) {
@@ -42,7 +48,7 @@ impl ConnectionManager {
             Type::Add => {
                 let node = Node("127.0.0.1".to_owned(), m.source_port);
                 println!("Added the node to core node list: {:?}", node);
-                self.nodes.push(node);
+                self.nodes.insert(node);
                 println!("Core nodes: {:?}", self.nodes);
             }
             // TODO: Remove
