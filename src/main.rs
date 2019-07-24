@@ -7,20 +7,22 @@ fn main() {
     println!("command line arguments: {:?}", args);
 
     match args.len() {
-        1 => {
+        2 => {
             println!("Bootstrapping as a GENESIS Core Node...");
-            let mut core = Core::new("127.0.0.1".to_owned(), "7878".to_owned());
+            let port = &args[1];
+            let mut core = Core::new("127.0.0.1".to_owned(), port.clone());
             core.start();
         }
         3 => {
             println!("Bootstrapping as a Core Node...");
-            let mut core = Core::new("127.0.0.1".to_owned(), "7879".to_owned());
 
-            let core_host = &args[1];
-            let core_port = &args[2];
-            core.join_network(core_host, core_port);
+            let port = &args[1];
+            let genesis_node = &args[2];
+
+            let mut core = Core::new("127.0.0.1".to_owned(), port.clone());
+            core.join_network(&String::from("127.0.0.1"), genesis_node);
             core.start();
         }
-        _ => panic!()
+        _ => println!("[Usage]\r ./blue port [genesis-node]\r\r port: A port number what node should listen on.\r genesis-node(optional): A port number of GENESIS node.")
     }
 }

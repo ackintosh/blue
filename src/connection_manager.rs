@@ -26,6 +26,7 @@ impl ConnectionManager {
     }
 
     pub fn start(&mut self) {
+        println!("Listening on {}:{}", self.host, self.port);
         let listener = TcpListener::bind(format!("{}:{}", self.host, self.port)).unwrap();
 
         for stream in listener.incoming() {
