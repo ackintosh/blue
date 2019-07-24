@@ -1,4 +1,5 @@
-use crate::connection_manager::ConnectionManager;
+use crate::connection_manager::{ConnectionManager, Node};
+use crate::message::{Message, Type};
 
 enum State {
     Init,
@@ -26,8 +27,15 @@ impl Core {
         self.cm.start();
     }
 
-    fn join_network(&mut self) {
+    pub fn join_network(&mut self, host: &String, port: &String) {
         self.state = State::ConnectedToNetwork;
+        ConnectionManager::send_msg(
+            &Node(host.clone(), port.clone()),
+            &Message{
+                r#type: Type::Add,
+                source_port: self.cm.port.clone(),
+            }
+        );
     }
 
     fn shutdown(&mut self) {

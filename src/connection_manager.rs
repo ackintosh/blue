@@ -4,11 +4,11 @@ use crate::message::{parse, Type, Message};
 use std::collections::HashSet;
 
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Hash)]
-struct Node(String, String);
+pub struct Node(pub String, pub String);
 
 pub struct ConnectionManager {
     host: String,
-    port: String,
+    pub port: String,
     nodes: HashSet<Node>,
 }
 
@@ -58,7 +58,7 @@ impl ConnectionManager {
         }
     }
 
-    fn send_msg(node: &Node, msg: &Message) {
+    pub fn send_msg(node: &Node, msg: &Message) {
         println!("Sending message: {:?}", msg);
         match TcpStream::connect(format!("{}:{}", node.0, node.1)) {
             Ok(mut stream) => {
