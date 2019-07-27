@@ -1,28 +1,28 @@
 use std::net::{TcpListener, TcpStream};
 use std::io::{Read, Write};
 use crate::message::{parse, Type, Message};
-use std::collections::HashSet;
-
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Hash)]
-pub struct Node(pub String, pub String);
+use crate::node::{Node, NodeSet};
+use std::sync::{Arc, RwLock};
+use crate::stringify;
+use std::error::Error;
 
 pub struct ConnectionManager {
     host: String,
     pub port: String,
-    nodes: HashSet<Node>,
+    nodes: Arc<RwLock<NodeSet>>,
 }
 
 impl ConnectionManager {
-    pub fn new(host: String, port: String) -> Self {
+    pub fn new(host: String, port: String, node_set: Arc<RwLock<NodeSet>>) -> Result<Self, Box<dyn Error>> {
         println!("Initializing connection manager...");
 
         let mut c = Self {
             host: host.clone(),
             port: port.clone(),
-            nodes: HashSet::new()
+            nodes: node_set,
         };
-        c.nodes.insert(Node(host.clone(), port.clone()));
-        c
+        c.nodes.write().map_err(stringify)?.insert(Node(host.clone(), port.clone()));
+        Ok(c)
     }
 
     pub fn start(&mut self) {
@@ -34,7 +34,8 @@ impl ConnectionManager {
         }
     }
 
-    fn handle_connection(&mut self, mut stream: TcpStream) {
+
+    fn handle_connection(&mut self, mut stream: TcpStream) -> Result<(), Box<dyn Error>>{
         let mut buffer = [0; 512];
 
         let size = stream.read(&mut buffer).unwrap();
@@ -47,16 +48,18 @@ impl ConnectionManager {
             Type::Add => {
                 let node = Node("127.0.0.1".to_owned(), m.source_port);
                 println!("Added the node to core node list: {:?}", node);
-                self.nodes.insert(node);
+                self.nodes.write().map_err(stringify)?.insert(node);
                 println!("Core nodes: {:?}", self.nodes);
             }
             Type::Remove => {
                 let node = Node("127.0.0.1".to_owned(), m.source_port);
                 println!("Removed the node from core node list: {:?}", node);
-                self.nodes.remove(&node);
+                self.nodes.write().map_err(stringify)?.remove(&node);
                 println!("Core nodes: {:?}", self.nodes);
             }
         }
+
+        Ok(())
     }
 
     pub fn send_msg(node: &Node, msg: &Message) {
