@@ -16,7 +16,7 @@ impl ConnectionManager {
     pub fn new(host: String, port: String, node_set: Arc<RwLock<NodeSet>>) -> Result<Self, Box<dyn Error>> {
         println!("Initializing connection manager...");
 
-        let mut c = Self {
+        let c = Self {
             host: host.clone(),
             port: port.clone(),
             nodes: node_set,
@@ -74,7 +74,7 @@ impl ConnectionManager {
                 }
             }
             Err(e) => {
-                println!("Failed to connect to the node: {:?}", node);
+                println!("Failed to connect to the node: {:?}, error: {:?}", node, e);
             }
         }
     }

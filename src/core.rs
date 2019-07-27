@@ -12,36 +12,52 @@ enum State {
 
 pub struct Core {
     state: State,
-    cm: ConnectionManager,
+    host: String,
+    port: String,
+    node_set: Arc<RwLock<NodeSet>>,
 }
 
 impl Core {
     pub fn new(host: String, port: String) -> Self {
         println!("Initializing core node...");
-        let node_set = Arc::new(RwLock::new(NodeSet::new()));
 
         Self {
             state: State::Init,
-            cm: ConnectionManager::new(
-                host.clone(),
-                port.clone(),
-                Arc::clone(&node_set)
-            ).unwrap(),
+            host: host.clone(),
+            port: port.clone(),
+            node_set: Arc::new(RwLock::new(NodeSet::new())),
         }
     }
 
-    pub fn start(&mut self) {
+    pub fn start_as_genesis(&mut self) {
         self.state = State::Standby;
-        self.cm.start();
+
+        let mut cm= ConnectionManager::new(
+            self.host.clone(),
+            self.port.clone(),
+            Arc::clone(&self.node_set)
+        ).unwrap();
+
+        let h = std::thread::spawn(move || {
+            cm.start();
+        });
+
+        h.join().unwrap();
     }
 
-    pub fn join_network(&mut self, host: &String, port: &String) {
+    pub fn start(&mut self, genesis_host: &String, genesis_port: &String) {
+        self.join_network(genesis_host, genesis_port);
+
+        println!("Not implemented yet");
+    }
+
+    fn join_network(&mut self, host: &String, port: &String) {
         self.state = State::ConnectedToNetwork;
         ConnectionManager::send_msg(
             &Node(host.clone(), port.clone()),
             &Message{
                 r#type: Type::Add,
-                source_port: self.cm.port.clone(),
+                source_port: self.port.clone(),
             }
         );
     }
