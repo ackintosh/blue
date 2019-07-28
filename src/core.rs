@@ -10,7 +10,42 @@ enum State {
     ShuttingDown,
 }
 
-pub struct Core {
+pub struct GenesisCoreNode {
+    core: Core,
+}
+
+impl GenesisCoreNode {
+    pub fn new(host: String, port: String) -> Self {
+        Self {
+            core: Core::new(host, port),
+        }
+    }
+
+    pub fn start(&mut self) {
+        self.core.start();
+    }
+}
+
+pub struct CoreNode {
+    core: Core,
+    genesis_node: Node,
+}
+
+impl CoreNode {
+    pub fn new(host: String, port: String, genesis_node: Node) -> Self {
+        Self {
+            core: Core::new(host, port),
+            genesis_node,
+        }
+    }
+
+    pub fn start(&mut self) {
+        self.core.join_network(&self.genesis_node);
+        self.core.start();
+    }
+}
+
+struct Core {
     state: State,
     host: String,
     port: String,
@@ -29,7 +64,7 @@ impl Core {
         }
     }
 
-    pub fn start_as_genesis(&mut self) {
+    pub fn start(&mut self) {
         self.state = State::Standby;
 
         let mut mh = MessageHandler::new(
@@ -45,16 +80,10 @@ impl Core {
         h.join().unwrap();
     }
 
-    pub fn start(&mut self, genesis_host: &String, genesis_port: &String) {
-        self.join_network(genesis_host, genesis_port);
-
-        println!("Not implemented yet");
-    }
-
-    fn join_network(&mut self, host: &String, port: &String) {
+    fn join_network(&mut self, node: &Node) {
         self.state = State::ConnectedToNetwork;
         send_msg(
-            &Node(host.clone(), port.clone()),
+            node,
             &Message{
                 r#type: Type::Add,
                 source_port: self.port.clone(),
