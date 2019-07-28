@@ -8,7 +8,7 @@ use std::error::Error;
 
 pub struct MessageHandler {
     host: String,
-    pub port: String,
+    port: String,
     nodes: Arc<RwLock<NodeSet>>,
 }
 
