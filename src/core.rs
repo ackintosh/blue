@@ -1,4 +1,4 @@
-use crate::connection_manager::{ConnectionManager};
+use crate::connection_manager::{MessageHandler};
 use crate::message::{Message, Type};
 use crate::node::{Node, NodeSet};
 use std::sync::{Arc, RwLock};
@@ -32,14 +32,14 @@ impl Core {
     pub fn start_as_genesis(&mut self) {
         self.state = State::Standby;
 
-        let mut cm= ConnectionManager::new(
+        let mut mh = MessageHandler::new(
             self.host.clone(),
             self.port.clone(),
             Arc::clone(&self.node_set)
         ).unwrap();
 
         let h = std::thread::spawn(move || {
-            cm.start();
+            mh.start();
         });
 
         h.join().unwrap();
@@ -53,7 +53,7 @@ impl Core {
 
     fn join_network(&mut self, host: &String, port: &String) {
         self.state = State::ConnectedToNetwork;
-        ConnectionManager::send_msg(
+        MessageHandler::send_msg(
             &Node(host.clone(), port.clone()),
             &Message{
                 r#type: Type::Add,

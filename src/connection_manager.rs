@@ -6,13 +6,13 @@ use std::sync::{Arc, RwLock};
 use crate::stringify;
 use std::error::Error;
 
-pub struct ConnectionManager {
+pub struct MessageHandler {
     host: String,
     pub port: String,
     nodes: Arc<RwLock<NodeSet>>,
 }
 
-impl ConnectionManager {
+impl MessageHandler {
     pub fn new(host: String, port: String, node_set: Arc<RwLock<NodeSet>>) -> Result<Self, Box<dyn Error>> {
         println!("Initializing connection manager...");
 
