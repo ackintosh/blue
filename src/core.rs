@@ -1,4 +1,4 @@
-use crate::connection_manager::{MessageHandler};
+use crate::connection_manager::{MessageHandler, send_msg};
 use crate::message::{Message, Type};
 use crate::node::{Node, NodeSet};
 use std::sync::{Arc, RwLock};
@@ -53,7 +53,7 @@ impl Core {
 
     fn join_network(&mut self, host: &String, port: &String) {
         self.state = State::ConnectedToNetwork;
-        MessageHandler::send_msg(
+        send_msg(
             &Node(host.clone(), port.clone()),
             &Message{
                 r#type: Type::Add,

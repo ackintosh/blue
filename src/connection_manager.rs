@@ -61,21 +61,21 @@ impl MessageHandler {
 
         Ok(())
     }
+}
 
-    pub fn send_msg(node: &Node, msg: &Message) {
-        println!("Sending message: {:?}", msg);
-        match TcpStream::connect(format!("{}:{}", node.0, node.1)) {
-            Ok(mut stream) => {
-                println!("Successfully connected to the node: {:?}", node);
+pub fn send_msg(node: &Node, msg: &Message) {
+    println!("Sending message: {:?}", msg);
+    match TcpStream::connect(format!("{}:{}", node.0, node.1)) {
+        Ok(mut stream) => {
+            println!("Successfully connected to the node: {:?}", node);
 
-                match stream.write(serde_json::to_string(&msg).unwrap().as_bytes()) {
-                    Ok(size) => println!("Sent {} bytes", size),
-                    Err(e) => println!("Failed to send message: {:?}", e)
-                }
+            match stream.write(serde_json::to_string(&msg).unwrap().as_bytes()) {
+                Ok(size) => println!("Sent {} bytes", size),
+                Err(e) => println!("Failed to send message: {:?}", e)
             }
-            Err(e) => {
-                println!("Failed to connect to the node: {:?}, error: {:?}", node, e);
-            }
+        }
+        Err(e) => {
+            println!("Failed to connect to the node: {:?}, error: {:?}", node, e);
         }
     }
 }
