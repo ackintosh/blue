@@ -1,3 +1,5 @@
+extern crate chrono;
+
 use std::net::{TcpListener, TcpStream};
 use std::io::{Read, Write};
 use crate::message::{parse, Type, Message};
@@ -5,6 +7,7 @@ use crate::node::{Node, NodeSet};
 use std::sync::{Arc, RwLock};
 use crate::stringify;
 use std::error::Error;
+use timer::{Timer, Guard};
 
 pub struct MessageHandler {
     host: String,
@@ -60,6 +63,27 @@ impl MessageHandler {
         }
 
         Ok(())
+    }
+}
+
+pub struct HealthChecker {
+    pub nodes: Arc<RwLock<NodeSet>>,
+}
+
+pub struct HealthCheckHandle {
+    timer: Timer,
+    guard: Guard,
+}
+
+impl HealthChecker {
+    pub fn start(&self) -> HealthCheckHandle {
+        let timer = Timer::new();
+
+        let guard = timer.schedule_repeating(time::Duration::seconds(3), || {
+            println!("Health check!");
+        });
+
+        HealthCheckHandle { timer, guard }
     }
 }
 

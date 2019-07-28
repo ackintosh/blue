@@ -1,7 +1,9 @@
-use crate::connection_manager::{MessageHandler, send_msg};
+use crate::connection_manager::{MessageHandler, send_msg, HealthChecker, HealthCheckHandle};
 use crate::message::{Message, Type};
 use crate::node::{Node, NodeSet};
 use std::sync::{Arc, RwLock};
+use timer::Guard;
+use std::thread::JoinHandle;
 
 enum State {
     Init,
@@ -22,7 +24,10 @@ impl GenesisCoreNode {
     }
 
     pub fn start(&mut self) {
-        self.core.start();
+        let message_handler_handle = self.core.start();
+        let health_check_handle = self.core.start_health_check();
+
+        message_handler_handle.join();
     }
 }
 
@@ -41,7 +46,9 @@ impl CoreNode {
 
     pub fn start(&mut self) {
         self.core.join_network(&self.genesis_node);
-        self.core.start();
+        let handle = self.core.start();
+
+        handle.join();
     }
 }
 
@@ -64,7 +71,7 @@ impl Core {
         }
     }
 
-    pub fn start(&mut self) {
+    pub fn start(&mut self) -> JoinHandle<()> {
         self.state = State::Standby;
 
         let mut mh = MessageHandler::new(
@@ -73,11 +80,16 @@ impl Core {
             Arc::clone(&self.node_set)
         ).unwrap();
 
-        let h = std::thread::spawn(move || {
+        std::thread::spawn(move || {
             mh.start();
-        });
+        })
+    }
 
-        h.join().unwrap();
+    pub fn start_health_check(&self) -> HealthCheckHandle {
+        let hc = HealthChecker {
+            nodes: Arc::clone(&self.node_set),
+        };
+        hc.start()
     }
 
     fn join_network(&mut self, node: &Node) {
