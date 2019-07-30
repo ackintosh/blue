@@ -70,6 +70,7 @@ impl MessageHandler {
 }
 
 pub struct HealthChecker {
+    port: String,
     nodes: Arc<RwLock<NodeSet>>,
 }
 
@@ -79,17 +80,18 @@ pub struct HealthCheckHandle {
 }
 
 impl HealthChecker {
-    pub fn new(nodes: Arc<RwLock<NodeSet>>) -> Self {
-        Self { nodes }
+    pub fn new(port: String, nodes: Arc<RwLock<NodeSet>>) -> Self {
+        Self { port, nodes }
     }
 
     pub fn start(&self) -> HealthCheckHandle {
         let timer = Timer::new();
         let nodes = self.nodes.clone();
+        let port = self.port.clone();
         let guard = timer.schedule_repeating(time::Duration::seconds(3), move || {
             for node in nodes.read().unwrap().iter() {
                 println!("Pinging to {:?}", node);
-                send_msg(node, &Message { r#type: Type::Ping, source_port: "12345".to_owned() });
+                send_msg(node, &Message { r#type: Type::Ping, source_port: port.clone() });
             }
         });
 

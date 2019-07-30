@@ -86,7 +86,7 @@ impl Core {
     }
 
     pub fn start_health_check(&self) -> HealthCheckHandle {
-        let hc = HealthChecker::new(Arc::clone(&self.node_set));
+        let hc = HealthChecker::new(self.port.clone(), Arc::clone(&self.node_set));
         hc.start()
     }
 
