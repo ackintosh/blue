@@ -70,7 +70,7 @@ impl MessageHandler {
 }
 
 pub struct HealthChecker {
-    pub nodes: Arc<RwLock<NodeSet>>,
+    nodes: Arc<RwLock<NodeSet>>,
 }
 
 pub struct HealthCheckHandle {
@@ -79,6 +79,10 @@ pub struct HealthCheckHandle {
 }
 
 impl HealthChecker {
+    pub fn new(nodes: Arc<RwLock<NodeSet>>) -> Self {
+        Self { nodes }
+    }
+
     pub fn start(&self) -> HealthCheckHandle {
         let timer = Timer::new();
         let nodes = self.nodes.clone();
