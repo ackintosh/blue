@@ -60,6 +60,9 @@ impl MessageHandler {
                 self.nodes.write().map_err(stringify)?.remove(&node);
                 println!("Core nodes: {:?}", self.nodes);
             }
+            Type::Ping => {
+                println!("Received a ping message from the port: {}", m.source_port);
+            }
         }
 
         Ok(())
@@ -78,9 +81,12 @@ pub struct HealthCheckHandle {
 impl HealthChecker {
     pub fn start(&self) -> HealthCheckHandle {
         let timer = Timer::new();
-
-        let guard = timer.schedule_repeating(time::Duration::seconds(3), || {
-            println!("Health check!");
+        let nodes = self.nodes.clone();
+        let guard = timer.schedule_repeating(time::Duration::seconds(3), move || {
+            for node in nodes.read().unwrap().iter() {
+                println!("Pinging to {:?}", node);
+                send_msg(node, &Message { r#type: Type::Ping, source_port: "12345".to_owned() });
+            }
         });
 
         HealthCheckHandle { timer, guard }

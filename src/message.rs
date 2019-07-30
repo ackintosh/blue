@@ -8,6 +8,7 @@ pub struct Message {
 pub enum Type {
     Add,
     Remove,
+    Ping,
 }
 
 pub fn parse(s: &String) -> Message {
