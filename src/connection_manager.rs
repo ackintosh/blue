@@ -89,11 +89,25 @@ impl HealthChecker {
         let nodes = self.nodes.clone();
         let port = self.port.clone();
         let guard = timer.schedule_repeating(time::Duration::seconds(3), move || {
+            let mut nodes_to_remove: NodeSet = NodeSet::new();
+
             for node in nodes.read().unwrap().iter() {
                 println!("Pinging to {:?}", node);
                 match send_msg(node, &Message { r#type: Type::Ping, source_port: port.clone() }) {
                     Ok(_) => println!("OK, {:?} is working fine!", node),
-                    Err(e) => println!("Oops, {:?} seems not healthy.", e)
+                    Err(e) => {
+                        println!("Oops, {:?} seems not healthy.", e);
+                        nodes_to_remove.insert(node.clone());
+                    }
+                }
+            }
+
+            if nodes_to_remove.is_empty() {
+                println!("Nothing to remove from NodeSet.");
+            } else {
+                for node in nodes_to_remove {
+                    nodes.write().unwrap().remove(&node);
+                    println!("Removed the {:?} from NodeSet.", node);
                 }
             }
         });
