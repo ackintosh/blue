@@ -91,7 +91,10 @@ impl HealthChecker {
         let guard = timer.schedule_repeating(time::Duration::seconds(3), move || {
             for node in nodes.read().unwrap().iter() {
                 println!("Pinging to {:?}", node);
-                send_msg(node, &Message { r#type: Type::Ping, source_port: port.clone() });
+                match send_msg(node, &Message { r#type: Type::Ping, source_port: port.clone() }) {
+                    Ok(_) => println!("OK, {:?} is working fine!", node),
+                    Err(e) => println!("Oops, {:?} seems not healthy.", e)
+                }
             }
         });
 
@@ -99,19 +102,24 @@ impl HealthChecker {
     }
 }
 
-pub fn send_msg(node: &Node, msg: &Message) {
+pub fn send_msg(node: &Node, msg: &Message) -> Result<(), String>{
     println!("Sending message: {:?}", msg);
     match TcpStream::connect(format!("{}:{}", node.0, node.1)) {
         Ok(mut stream) => {
             println!("Successfully connected to the node: {:?}", node);
 
             match stream.write(serde_json::to_string(&msg).unwrap().as_bytes()) {
-                Ok(size) => println!("Sent {} bytes", size),
-                Err(e) => println!("Failed to send message: {:?}", e)
+                Ok(size) => {
+                    println!("Sent {} bytes", size);
+                    return Ok(())
+                }
+                Err(e) => {
+                    return Err(format!("Failed to send message: {:?}", e));
+                }
             }
         }
         Err(e) => {
-            println!("Failed to connect to the node: {:?}, error: {:?}", node, e);
+            return Err(format!("Failed to connect to the node: {:?}, error: {:?}", node, e));
         }
     }
 }
