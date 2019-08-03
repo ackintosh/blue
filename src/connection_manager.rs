@@ -19,13 +19,11 @@ impl MessageHandler {
     pub fn new(host: String, port: String, node_set: Arc<RwLock<NodeSet>>) -> Result<Self, Box<dyn Error>> {
         println!("Initializing connection manager...");
 
-        let c = Self {
+        Ok(Self {
             host: host.clone(),
             port: port.clone(),
             nodes: node_set,
-        };
-        c.nodes.write().map_err(stringify)?.insert(Node(host.clone(), port.clone()));
-        Ok(c)
+        })
     }
 
     pub fn start(&mut self) {
