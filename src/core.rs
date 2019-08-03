@@ -77,7 +77,7 @@ impl Core {
             self.host.clone(),
             self.port.clone(),
             Arc::clone(&self.node_set)
-        ).unwrap();
+        );
 
         std::thread::spawn(move || {
             mh.start();

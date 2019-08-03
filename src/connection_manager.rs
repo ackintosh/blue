@@ -16,14 +16,14 @@ pub struct MessageHandler {
 }
 
 impl MessageHandler {
-    pub fn new(host: String, port: String, node_set: Arc<RwLock<NodeSet>>) -> Result<Self, Box<dyn Error>> {
+    pub fn new(host: String, port: String, node_set: Arc<RwLock<NodeSet>>) -> Self {
         println!("Initializing connection manager...");
 
-        Ok(Self {
+        Self {
             host: host.clone(),
             port: port.clone(),
             nodes: node_set,
-        })
+        }
     }
 
     pub fn start(&mut self) {
