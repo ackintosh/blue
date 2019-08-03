@@ -9,6 +9,7 @@ pub enum Type {
     Add,
     Remove,
     Ping,
+    Nodes,
 }
 
 pub fn parse(s: &String) -> Message {

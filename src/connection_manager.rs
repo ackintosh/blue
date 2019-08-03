@@ -53,6 +53,25 @@ impl MessageHandler {
                 println!("Added the node to core node list: {:?}", node);
                 self.nodes.write().map_err(stringify)?.insert(node);
                 println!("Core nodes: {:?}", self.nodes);
+
+                let mut handles = vec![];
+                let nodes = self.nodes.read().map_err(stringify).unwrap(); //.iter().clone();
+
+                for n in nodes.iter() {
+                    let node = n.clone();
+                    let source_port = self.port.clone();
+                    let h = std::thread::spawn(move || {
+                        match send_msg(&node, &Message { r#type: Type::Nodes, source_port }) {
+                            Ok(_) => {}
+                            Err(e) => println!("Failed to send NodeSet: {:?}", e)
+                        }
+                    });
+                    handles.push(h);
+                }
+
+                for h in handles {
+                    h.join().unwrap();
+                }
             }
             Type::Remove => {
                 let node = Node("127.0.0.1".to_owned(), m.source_port);
@@ -62,6 +81,9 @@ impl MessageHandler {
             }
             Type::Ping => {
                 println!("Received a ping message from the port: {}", m.source_port);
+            }
+            Type::Nodes => {
+                println!("TODO");
             }
         }
 
