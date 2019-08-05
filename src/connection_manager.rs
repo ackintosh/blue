@@ -87,6 +87,10 @@ impl MessageHandler {
                 let mut nodes = self.nodes.write().map_err(stringify).unwrap();
                 nodes.clear();
                 for n in nodes_payload.iter() {
+                    if self.is_self(&n) {
+                        println!("Skipped the node to insert to NodeSet as it's same as myself: {:?}", n);
+                        continue;
+                    }
                     if !nodes.insert(n.clone()) {
                         println!("Failed to insert the node: {:?}", n);
                     }
@@ -96,6 +100,10 @@ impl MessageHandler {
         }
 
         Ok(())
+    }
+
+    fn is_self(&self, node: &Node) -> bool {
+        self.host == node.0 && self.port == node.1
     }
 }
 
