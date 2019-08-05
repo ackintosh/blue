@@ -58,9 +58,11 @@ impl MessageHandler {
                 for n in nodes.iter() {
                     let destination = n.clone();
                     let source_port = self.port.clone();
-                    let nodeset_cloned = nodes.clone();
+                    let mut nodeset_to_send = nodes.clone();
+                    nodeset_to_send.insert(Node(self.host.clone(), self.port.clone()));
+
                     let h = std::thread::spawn(move || {
-                        match send_msg(&destination, &Message::new_node_sets(source_port, &nodeset_cloned)) {
+                        match send_msg(&destination, &Message::new_node_sets(source_port, &nodeset_to_send)) {
                             Ok(_) => {}
                             Err(e) => println!("Failed to send NodeSet: {:?}", e)
                         }
