@@ -2,7 +2,7 @@ extern crate chrono;
 
 use std::net::{TcpListener, TcpStream};
 use std::io::{Read, Write};
-use crate::message::{parse, Type, Message};
+use crate::message::{parse, Type, Message, parse_node_set_payload};
 use crate::node::{Node, NodeSet};
 use std::sync::{Arc, RwLock};
 use crate::stringify;
@@ -53,13 +53,14 @@ impl MessageHandler {
                 println!("Core nodes: {:?}", self.nodes);
 
                 let mut handles = vec![];
-                let nodes = self.nodes.read().map_err(stringify).unwrap(); //.iter().clone();
+                let nodes = self.nodes.read().map_err(stringify).unwrap();
 
                 for n in nodes.iter() {
-                    let node = n.clone();
+                    let destination = n.clone();
                     let source_port = self.port.clone();
+                    let nodeset_cloned = nodes.clone();
                     let h = std::thread::spawn(move || {
-                        match send_msg(&node, &Message { r#type: Type::Nodes, source_port }) {
+                        match send_msg(&destination, &Message::new_node_sets(source_port, &nodeset_cloned)) {
                             Ok(_) => {}
                             Err(e) => println!("Failed to send NodeSet: {:?}", e)
                         }
@@ -81,7 +82,16 @@ impl MessageHandler {
                 println!("Received a ping message from the port: {}", m.source_port);
             }
             Type::Nodes => {
-                println!("TODO");
+                println!("Received the NodeSet: {:?}", m);
+                let nodes_payload = parse_node_set_payload(&m.payload);
+                let mut nodes = self.nodes.write().map_err(stringify).unwrap();
+                nodes.clear();
+                for n in nodes_payload.iter() {
+                    if !nodes.insert(n.clone()) {
+                        println!("Failed to insert the node: {:?}", n);
+                    }
+                }
+                println!("Finished to update NodeSet");
             }
         }
 
@@ -113,7 +123,7 @@ impl HealthChecker {
 
             for node in nodes.read().unwrap().iter() {
                 println!("Pinging to {:?}", node);
-                match send_msg(node, &Message { r#type: Type::Ping, source_port: port.clone() }) {
+                match send_msg(node, &Message::new(Type::Ping, port.clone())) {
                     Ok(_) => println!("OK, {:?} is working fine!", node),
                     Err(e) => {
                         println!("Oops, {:?} seems not healthy.", e);
