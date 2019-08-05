@@ -52,33 +52,15 @@ impl MessageHandler {
                 self.nodes.write().map_err(stringify)?.insert(node);
                 println!("Core nodes: {:?}", self.nodes);
 
-                let mut handles = vec![];
-                let nodes = self.nodes.read().map_err(stringify).unwrap();
-
-                for n in nodes.iter() {
-                    let destination = n.clone();
-                    let source_port = self.port.clone();
-                    let mut nodeset_to_send = nodes.clone();
-                    nodeset_to_send.insert(Node(self.host.clone(), self.port.clone()));
-
-                    let h = std::thread::spawn(move || {
-                        match send_msg(&destination, &Message::new_node_sets(source_port, &nodeset_to_send)) {
-                            Ok(_) => {}
-                            Err(e) => println!("Failed to send NodeSet: {:?}", e)
-                        }
-                    });
-                    handles.push(h);
-                }
-
-                for h in handles {
-                    h.join().unwrap();
-                }
+                self.notify_node_set();
             }
             Type::Remove => {
                 let node = Node("127.0.0.1".to_owned(), m.source_port);
                 println!("Removed the node from core node list: {:?}", node);
                 self.nodes.write().map_err(stringify)?.remove(&node);
                 println!("Core nodes: {:?}", self.nodes);
+
+                self.notify_node_set();
             }
             Type::Ping => {
                 println!("Received a ping message from the port: {}", m.source_port);
@@ -102,6 +84,32 @@ impl MessageHandler {
         }
 
         Ok(())
+    }
+
+    fn notify_node_set(&self) {
+        println!("Notifying the nodesets to nodes in network");
+
+        let mut handles = vec![];
+        let nodes = self.nodes.read().map_err(stringify).unwrap();
+
+        for n in nodes.iter() {
+            let destination = n.clone();
+            let source_port = self.port.clone();
+            let mut nodeset_to_send = nodes.clone();
+            nodeset_to_send.insert(Node(self.host.clone(), self.port.clone()));
+
+            let h = std::thread::spawn(move || {
+                match send_msg(&destination, &Message::new_node_sets(source_port, &nodeset_to_send)) {
+                    Ok(_) => {}
+                    Err(e) => println!("Failed to send NodeSet: {:?}", e)
+                }
+            });
+            handles.push(h);
+        }
+
+        for h in handles {
+            h.join().unwrap();
+        }
     }
 
     fn is_self(&self, node: &Node) -> bool {
