@@ -77,7 +77,7 @@ impl Core {
             self.host.clone(),
             self.port.clone(),
             Arc::clone(&self.node_set)
-        ).unwrap();
+        );
 
         std::thread::spawn(move || {
             mh.start();
@@ -93,10 +93,10 @@ impl Core {
         self.state = State::ConnectedToNetwork;
         send_msg(
             node,
-            &Message{
-                r#type: Type::Add,
-                source_port: self.port.clone(),
-            }
+            &Message::new(
+                Type::Add,
+                self.port.clone()
+            )
         );
     }
 
