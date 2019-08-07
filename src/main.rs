@@ -1,5 +1,6 @@
 use blue::core::{CoreNode, GenesisCoreNode};
 use blue::node::Node;
+use blue::edge::EdgeNode;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -41,5 +42,15 @@ fn run_core_node(args: Vec<String>) {
 }
 
 fn run_edge_node(args: Vec<String>) {
+    if args.len() == 4 {
+        println!("Bootstrapping as a Edge Node...");
+        let port = &args[2];
+        let core_node = &args[3];
 
+        let mut edge = EdgeNode::new("127.0.0.1".to_owned(), port.clone(), core_node.clone());
+        edge.start();
+    } else {
+        println!("[Usage]\r ./blue edge {{port}} {{core-node}}\r\r port: A port number what node should listen on.\r core-node: A port number of core node.");
+        std::process::exit(1);
+    }
 }

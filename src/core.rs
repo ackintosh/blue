@@ -1,15 +1,9 @@
 use crate::connection_manager::{MessageHandler, send_msg, HealthChecker, HealthCheckHandle};
 use crate::message::{Message, Type};
-use crate::node::{Node, NodeSet};
+use crate::node::{Node, NodeSet, State};
 use std::sync::{Arc, RwLock};
 use std::thread::JoinHandle;
 
-enum State {
-    Init,
-    Standby,
-    ConnectedToNetwork,
-    ShuttingDown,
-}
 
 pub struct GenesisCoreNode {
     core: Core,

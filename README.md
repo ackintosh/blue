@@ -27,3 +27,13 @@ Initializing core node...
 Sending message: Message { type: Add, source_port: "17879" }
 Successfully connected to the node: Node("127.0.0.1", "7878")
 ```
+
+## Run Edge Node
+
+```bash
+./blue edge {port} {port num of core node}
+```
+
+```bash
+$ cargo run edge 9000 7878
+```
