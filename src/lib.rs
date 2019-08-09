@@ -4,6 +4,7 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 
+pub mod p2p;
 pub mod core;
 pub mod edge;
 pub mod node;

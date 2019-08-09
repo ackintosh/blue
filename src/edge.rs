@@ -1,5 +1,6 @@
 use crate::node::{State, NodeSet, Node};
 use std::sync::{Arc, RwLock};
+use crate::p2p::JoinNetwork;
 
 pub struct EdgeNode {
     state: State,
@@ -7,6 +8,12 @@ pub struct EdgeNode {
     port: String,
     core_node: Node,
     node_set: Arc<RwLock<NodeSet>>,
+}
+
+impl JoinNetwork for EdgeNode {
+    fn port_number(&self) -> String {
+        self.port.clone()
+    }
 }
 
 impl EdgeNode {
@@ -22,5 +29,6 @@ impl EdgeNode {
 
     pub fn start(self) {
         // TODO
+        self.join_network(&self.core_node);
     }
 }

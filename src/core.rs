@@ -3,6 +3,7 @@ use crate::message::{Message, Type};
 use crate::node::{Node, NodeSet, State};
 use std::sync::{Arc, RwLock};
 use std::thread::JoinHandle;
+use crate::p2p::JoinNetwork;
 
 
 pub struct GenesisCoreNode {
@@ -52,6 +53,12 @@ struct Core {
     node_set: Arc<RwLock<NodeSet>>,
 }
 
+impl JoinNetwork for Core {
+    fn port_number(&self) -> String {
+        self.port.clone()
+    }
+}
+
 impl Core {
     pub fn new(host: String, port: String) -> Self {
         println!("Initializing core node...");
@@ -84,14 +91,8 @@ impl Core {
     }
 
     fn join_network(&mut self, node: &Node) {
+        self.join_network(node);
         self.state = State::ConnectedToNetwork;
-        send_msg(
-            node,
-            &Message::new(
-                Type::Add,
-                self.port.clone()
-            )
-        );
     }
 
     fn shutdown(&mut self) {
