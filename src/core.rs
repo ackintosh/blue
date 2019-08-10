@@ -41,7 +41,7 @@ impl CoreNode {
     }
 
     pub fn start(&mut self) {
-        self.core.join_network(&self.genesis_node);
+        self.core.join_core_network(&self.genesis_node);
         let handle = self.core.start();
 
         handle.join();
@@ -108,6 +108,11 @@ impl HandleMessage for CoreMessageHandler {
         Ok(())
     }
 
+    fn handle_add_edge(&mut self, message: &Message) -> Result<(), Box<dyn Error>> {
+        println!("TODO");
+        Ok(())
+    }
+
     fn handle_remove(&mut self, message: &Message) -> Result<(), Box<dyn Error>> {
         let node = Node("127.0.0.1".to_owned(), message.source_port.clone());
         println!("Removed the node from core node list: {:?}", node);
@@ -168,8 +173,8 @@ impl Core {
         hc.start()
     }
 
-    fn join_network(&mut self, node: &Node) {
-        self.join_network(node);
+    fn join_core_network(&mut self, node: &Node) {
+        self.join_network(node, crate::message::Type::Add);
         self.state = State::ConnectedToNetwork;
     }
 

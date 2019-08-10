@@ -28,6 +28,7 @@ impl Message {
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Type {
     Add,
+    AddEdge,
     Remove,
     Ping,
     Nodes,

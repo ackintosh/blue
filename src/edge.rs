@@ -36,7 +36,7 @@ impl EdgeNode {
     }
 
     pub fn start(self) {
-        self.join_network(&self.core_node);
+        self.join_network(&self.core_node, crate::message::Type::AddEdge);
 
         let mut mh = EdgeMessageHandler::new(&self.host, &self.port, &self.core_node, &self.node_set);
         let handler = std::thread::spawn(move || {
@@ -79,6 +79,12 @@ impl HandleMessage for EdgeMessageHandler {
         println!("TODO");
         Ok(())
     }
+
+    fn handle_add_edge(&mut self, message: &Message) -> Result<(), Box<dyn Error>> {
+        println!("TODO");
+        Ok(())
+    }
+
     fn handle_remove(&mut self, message: &Message) -> Result<(), Box<dyn Error>> {
         println!("TODO");
         Ok(())

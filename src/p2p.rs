@@ -13,11 +13,11 @@ pub trait P2pNode {
 }
 
 pub trait JoinNetwork: P2pNode {
-    fn join_network(&self, node: &Node) {
+    fn join_network(&self, node: &Node, message_type: Type) {
         send_msg(
             node,
             &Message::new(
-                Type::Add,
+                message_type,
                 self.port_number()
             )
         );
@@ -45,6 +45,7 @@ pub trait HandleMessage: P2pNode {
 
         match m.r#type {
             Type::Add => self.handle_add(&m),
+            Type::AddEdge => self.handle_add_edge(&m),
             Type::Remove => self.handle_remove(&m),
             Type::Ping => self.handle_ping(&m),
             Type::Nodes => self.handle_nodes(&m)
@@ -52,6 +53,7 @@ pub trait HandleMessage: P2pNode {
     }
 
     fn handle_add(&mut self, message: &Message) -> Result<(), Box<dyn Error>>;
+    fn handle_add_edge(&mut self, message: &Message) -> Result<(), Box<dyn Error>>;
     fn handle_remove(&mut self, message: &Message) -> Result<(), Box<dyn Error>>;
     fn handle_ping(&self, message: &Message) -> Result<(), Box<dyn Error>>;
     fn handle_nodes(&mut self, message: &Message) -> Result<(), Box<dyn Error>>;
