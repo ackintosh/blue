@@ -5,3 +5,9 @@ pub struct Node(pub String, pub String);
 
 pub type NodeSet = HashSet<Node>;
 
+pub enum State {
+    Init,
+    Standby,
+    ConnectedToNetwork,
+    ShuttingDown,
+}
