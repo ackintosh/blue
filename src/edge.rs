@@ -1,6 +1,8 @@
 use crate::node::{State, NodeSet, Node};
 use std::sync::{Arc, RwLock};
-use crate::p2p::{JoinNetwork, HandleMessage};
+use crate::p2p::{JoinNetwork, HandleMessage, P2pNode};
+use crate::message::Message;
+use std::error::Error;
 
 pub struct EdgeNode {
     state: State,
@@ -10,13 +12,36 @@ pub struct EdgeNode {
     node_set: Arc<RwLock<NodeSet>>,
 }
 
-impl JoinNetwork for EdgeNode {
+impl P2pNode for EdgeNode {
+    fn host(&self) -> String {
+        self.host.clone()
+    }
+
     fn port_number(&self) -> String {
         self.port.clone()
     }
 }
 
-impl HandleMessage for EdgeNode {}
+impl JoinNetwork for EdgeNode {}
+
+impl HandleMessage for EdgeNode {
+    fn handle_add(&mut self, message: &Message) -> Result<(), Box<dyn Error>>{
+        println!("TODO");
+        Ok(())
+    }
+    fn handle_remove(&mut self, message: &Message) -> Result<(), Box<dyn Error>> {
+        println!("TODO");
+        Ok(())
+    }
+    fn handle_ping(&self, message: &Message) -> Result<(), Box<dyn Error>> {
+        println!("TODO");
+        Ok(())
+    }
+    fn handle_nodes(&mut self, message: &Message) -> Result<(), Box<dyn Error>> {
+        println!("TODO");
+        Ok(())
+    }
+}
 
 impl EdgeNode {
     pub fn new(host: String, port: String, core_node_port: String) -> Self {
@@ -31,8 +56,5 @@ impl EdgeNode {
 
     pub fn start(self) {
         self.join_network(&self.core_node);
-        let message_handler_handle = self.listen(&self.host, &self.port, &self.node_set);
-
-        message_handler_handle.join();
     }
 }
