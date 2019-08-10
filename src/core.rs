@@ -67,6 +67,47 @@ impl P2pNode for Core {
 
 impl JoinNetwork for Core {}
 
+impl Core {
+    pub fn new(host: String, port: String) -> Self {
+        println!("Initializing core node...");
+
+        Self {
+            state: State::Init,
+            host: host.clone(),
+            port: port.clone(),
+            node_set: Arc::new(RwLock::new(NodeSet::new())),
+        }
+    }
+
+    pub fn start(&mut self) -> JoinHandle<()> {
+        self.state = State::Standby;
+
+        let mut mh = CoreMessageHandler::new(&self.host, &self.port, &self.node_set);
+        std::thread::spawn(move || {
+            mh.listen()
+        })
+    }
+
+    pub fn start_health_check(&self) -> HealthCheckHandle {
+        let hc = HealthChecker::new(self.port.clone(), Arc::clone(&self.node_set));
+        hc.start()
+    }
+
+    fn join_core_network(&mut self, node: &Node) {
+        self.join_network(node, crate::message::Type::Add);
+        self.state = State::ConnectedToNetwork;
+    }
+
+    fn shutdown(&mut self) {
+        self.state = State::ShuttingDown;
+        println!("Shutdown core node...");
+    }
+
+    fn get_state(&self) -> &State {
+        &self.state
+    }
+}
+
 struct CoreMessageHandler {
     host: String,
     port: String,
@@ -144,46 +185,5 @@ impl HandleMessage for CoreMessageHandler {
         }
         println!("Finished to update NodeSet");
         Ok(())
-    }
-}
-
-impl Core {
-    pub fn new(host: String, port: String) -> Self {
-        println!("Initializing core node...");
-
-        Self {
-            state: State::Init,
-            host: host.clone(),
-            port: port.clone(),
-            node_set: Arc::new(RwLock::new(NodeSet::new())),
-        }
-    }
-
-    pub fn start(&mut self) -> JoinHandle<()> {
-        self.state = State::Standby;
-
-        let mut mh = CoreMessageHandler::new(&self.host, &self.port, &self.node_set);
-        std::thread::spawn(move || {
-            mh.listen()
-        })
-    }
-
-    pub fn start_health_check(&self) -> HealthCheckHandle {
-        let hc = HealthChecker::new(self.port.clone(), Arc::clone(&self.node_set));
-        hc.start()
-    }
-
-    fn join_core_network(&mut self, node: &Node) {
-        self.join_network(node, crate::message::Type::Add);
-        self.state = State::ConnectedToNetwork;
-    }
-
-    fn shutdown(&mut self) {
-        self.state = State::ShuttingDown;
-        println!("Shutdown core node...");
-    }
-
-    fn get_state(&self) -> &State {
-        &self.state
     }
 }
