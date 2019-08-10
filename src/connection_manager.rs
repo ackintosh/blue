@@ -1,12 +1,11 @@
 extern crate chrono;
 
-use std::net::{TcpListener, TcpStream};
-use std::io::{Read, Write};
-use crate::message::{parse, Type, Message, parse_node_set_payload};
+use std::net::TcpStream;
+use std::io::Write;
+use crate::message::{Type, Message};
 use crate::node::{Node, NodeSet};
 use std::sync::{Arc, RwLock};
 use crate::stringify;
-use std::error::Error;
 use timer::{Timer, Guard};
 
 pub struct HealthChecker {

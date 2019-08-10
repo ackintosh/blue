@@ -1,5 +1,5 @@
-use crate::connection_manager::{send_msg, HealthChecker, HealthCheckHandle, notify_node_set};
-use crate::message::{Message, Type, parse_node_set_payload};
+use crate::connection_manager::{HealthChecker, HealthCheckHandle, notify_node_set};
+use crate::message::{Message, parse_node_set_payload};
 use crate::node::{Node, NodeSet, State};
 use std::sync::{Arc, RwLock};
 use std::thread::JoinHandle;

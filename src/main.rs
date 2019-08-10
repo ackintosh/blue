@@ -47,7 +47,7 @@ fn run_edge_node(args: Vec<String>) {
         let port = &args[2];
         let core_node = &args[3];
 
-        let mut edge = EdgeNode::new("127.0.0.1".to_owned(), port.clone(), core_node.clone());
+        let edge = EdgeNode::new("127.0.0.1".to_owned(), port.clone(), core_node.clone());
         edge.start();
     } else {
         println!("[Usage]\r ./blue edge {{port}} {{core-node}}\r\r port: A port number what node should listen on.\r core-node: A port number of core node.");

@@ -1,8 +1,6 @@
-use crate::node::{Node, NodeSet};
+use crate::node::Node;
 use crate::connection_manager::{send_msg};
 use crate::message::{Message, Type, parse};
-use std::thread::JoinHandle;
-use std::sync::{Arc, RwLock};
 use std::net::{TcpStream, TcpListener};
 use std::error::Error;
 use std::io::Read;
