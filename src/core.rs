@@ -53,6 +53,7 @@ struct Core {
     host: String,
     port: String,
     node_set: Arc<RwLock<NodeSet>>,
+    edge_node_set: Arc<RwLock<NodeSet>>,
 }
 
 impl P2pNode for Core {
@@ -76,13 +77,14 @@ impl Core {
             host: host.clone(),
             port: port.clone(),
             node_set: Arc::new(RwLock::new(NodeSet::new())),
+            edge_node_set: Arc::new(RwLock::new(NodeSet::new())),
         }
     }
 
     pub fn start(&mut self) -> JoinHandle<()> {
         self.state = State::Standby;
 
-        let mut mh = CoreMessageHandler::new(&self.host, &self.port, &self.node_set);
+        let mut mh = CoreMessageHandler::new(&self.host, &self.port, &self.node_set, &self.edge_node_set);
         std::thread::spawn(move || {
             mh.listen()
         })
@@ -112,14 +114,16 @@ struct CoreMessageHandler {
     host: String,
     port: String,
     node_set: Arc<RwLock<NodeSet>>,
+    edge_node_set: Arc<RwLock<NodeSet>>,
 }
 
 impl CoreMessageHandler {
-    fn new(host: &String, port: &String, node_set: &Arc<RwLock<NodeSet>>) -> Self {
+    fn new(host: &String, port: &String, node_set: &Arc<RwLock<NodeSet>>, edge_node_set: &Arc<RwLock<NodeSet>>) -> Self {
         Self {
             host: host.clone(),
             port: port.clone(),
-            node_set: Arc::clone(node_set)
+            node_set: Arc::clone(node_set),
+            edge_node_set: Arc::clone(edge_node_set),
         }
     }
 
@@ -142,6 +146,7 @@ impl HandleMessage for CoreMessageHandler {
     fn handle_add(&mut self, message: &Message) -> Result<(), Box<dyn Error>>{
         let node = Node("127.0.0.1".to_owned(), message.source_port.clone());
         println!("Added the node to core node list: {:?}", node);
+
         self.node_set.write().map_err(stringify)?.insert(node);
         println!("Core nodes: {:?}", self.node_set);
 
@@ -150,7 +155,11 @@ impl HandleMessage for CoreMessageHandler {
     }
 
     fn handle_add_edge(&mut self, message: &Message) -> Result<(), Box<dyn Error>> {
-        println!("TODO");
+        let node = Node("127.0.0.1".to_owned(), message.source_port.clone());
+        println!("Added the node to edge node list: {:?}", node);
+
+        self.edge_node_set.write().map_err(stringify)?.insert(node);
+        println!("Edge nodes: {:?}", self.edge_node_set);
         Ok(())
     }
 
