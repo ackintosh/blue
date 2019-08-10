@@ -24,7 +24,57 @@ impl P2pNode for EdgeNode {
 
 impl JoinNetwork for EdgeNode {}
 
-impl HandleMessage for EdgeNode {
+impl EdgeNode {
+    pub fn new(host: String, port: String, core_node_port: String) -> Self {
+        Self {
+            state: State::Init,
+            host,
+            port,
+            core_node: Node("127.0.0.1".to_owned(), core_node_port),
+            node_set: Arc::new(RwLock::new(NodeSet::new())),
+        }
+    }
+
+    pub fn start(self) {
+        self.join_network(&self.core_node);
+
+        let mut mh = EdgeMessageHandler::new(&self.host, &self.port, &self.core_node, &self.node_set);
+        let handler = std::thread::spawn(move || {
+            mh.listen();
+        });
+        handler.join();
+    }
+}
+
+struct EdgeMessageHandler {
+    host: String,
+    port: String,
+    core_node: Node,
+    node_set: Arc<RwLock<NodeSet>>,
+}
+
+impl EdgeMessageHandler {
+    fn new(host: &String, port: &String, core_node: &Node, node_set: &Arc<RwLock<NodeSet>>) -> Self {
+        Self {
+            host: host.clone(),
+            port: port.clone(),
+            core_node: core_node.clone(),
+            node_set: Arc::clone(node_set)
+        }
+    }
+}
+
+impl P2pNode for EdgeMessageHandler {
+    fn host(&self) -> String {
+        self.host.clone()
+    }
+
+    fn port_number(&self) -> String {
+        self.port.clone()
+    }
+}
+
+impl HandleMessage for EdgeMessageHandler {
     fn handle_add(&mut self, message: &Message) -> Result<(), Box<dyn Error>>{
         println!("TODO");
         Ok(())
@@ -40,21 +90,5 @@ impl HandleMessage for EdgeNode {
     fn handle_nodes(&mut self, message: &Message) -> Result<(), Box<dyn Error>> {
         println!("TODO");
         Ok(())
-    }
-}
-
-impl EdgeNode {
-    pub fn new(host: String, port: String, core_node_port: String) -> Self {
-        Self {
-            state: State::Init,
-            host,
-            port,
-            core_node: Node("127.0.0.1".to_owned(), core_node_port),
-            node_set: Arc::new(RwLock::new(NodeSet::new())),
-        }
-    }
-
-    pub fn start(self) {
-        self.join_network(&self.core_node);
     }
 }
