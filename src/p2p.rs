@@ -11,14 +11,14 @@ pub trait P2pNode {
 }
 
 pub trait JoinNetwork: P2pNode {
-    fn join_network(&self, node: &Node, message_type: Type) {
+    fn join_network(&self, node: &Node, message_type: Type) -> Result<(), String> {
         send_msg(
             node,
             &Message::new(
                 message_type,
                 self.port_number()
             )
-        );
+        )
     }
 }
 
@@ -28,7 +28,12 @@ pub trait HandleMessage: P2pNode {
         let listener = TcpListener::bind(format!("{}:{}", self.host(), self.port_number())).unwrap();
 
         for stream in listener.incoming() {
-            self.handle(&stream.unwrap());
+            match self.handle(&stream.unwrap()) {
+                Err(e) => {
+                    println!("Something wrong while message handling: {:?}", e.to_string());
+                }
+                _ => {}
+            }
         }
     }
 

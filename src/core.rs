@@ -23,7 +23,7 @@ impl GenesisCoreNode {
         let message_handler_handle = self.core.start();
         let _health_check_handle = self.core.start_health_check();
 
-        message_handler_handle.join();
+        message_handler_handle.join().unwrap();;
     }
 }
 
@@ -44,7 +44,7 @@ impl CoreNode {
         self.core.join_core_network(&self.genesis_node);
         let handle = self.core.start();
 
-        handle.join();
+        handle.join().unwrap();
     }
 }
 
@@ -96,7 +96,7 @@ impl Core {
     }
 
     fn join_core_network(&mut self, node: &Node) {
-        self.join_network(node, crate::message::Type::Add);
+        self.join_network(node, crate::message::Type::Add).unwrap();
         self.state = State::ConnectedToNetwork;
     }
 

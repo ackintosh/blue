@@ -36,13 +36,13 @@ impl EdgeNode {
     }
 
     pub fn start(self) {
-        self.join_network(&self.core_node, crate::message::Type::AddEdge);
+        self.join_network(&self.core_node, crate::message::Type::AddEdge).unwrap();
 
         let mut mh = EdgeMessageHandler::new(&self.host, &self.port, &self.core_node, &self.node_set);
         let handler = std::thread::spawn(move || {
             mh.listen();
         });
-        handler.join();
+        handler.join().unwrap();
     }
 }
 
