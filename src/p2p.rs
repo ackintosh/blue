@@ -18,8 +18,8 @@ pub trait JoinNetwork {
     }
 }
 
-pub trait ListenMessage {
-    fn listen_message(&self, host: &String, port: &String, node_set: &Arc<RwLock<NodeSet>>) -> JoinHandle<()> {
+pub trait HandleMessage {
+    fn listen(&self, host: &String, port: &String, node_set: &Arc<RwLock<NodeSet>>) -> JoinHandle<()> {
         let mut mh = MessageHandler::new(
             host.clone(),
             port.clone(),
