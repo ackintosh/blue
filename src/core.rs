@@ -21,7 +21,7 @@ impl GenesisCoreNode {
 
     pub fn start(&mut self) {
         let message_handler_handle = self.core.start();
-        let health_check_handle = self.core.start_health_check();
+        let _health_check_handle = self.core.start_health_check();
 
         message_handler_handle.join();
     }
@@ -100,14 +100,14 @@ impl Core {
         self.state = State::ConnectedToNetwork;
     }
 
-    fn shutdown(&mut self) {
-        self.state = State::ShuttingDown;
-        println!("Shutdown core node...");
-    }
+//    fn shutdown(&mut self) {
+//        self.state = State::ShuttingDown;
+//        println!("Shutdown core node...");
+//    }
 
-    fn get_state(&self) -> &State {
-        &self.state
-    }
+//    fn get_state(&self) -> &State {
+//        &self.state
+//    }
 }
 
 struct CoreMessageHandler {

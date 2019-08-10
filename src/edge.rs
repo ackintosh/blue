@@ -76,24 +76,24 @@ impl P2pNode for EdgeMessageHandler {
 
 impl HandleMessage for EdgeMessageHandler {
     fn handle_add(&mut self, message: &Message) -> Result<(), Box<dyn Error>>{
-        println!("TODO");
+        println!("[!] Received tye Type::Add message but edge node can't process it: {:?}", message);
         Ok(())
     }
 
     fn handle_add_edge(&mut self, message: &Message) -> Result<(), Box<dyn Error>> {
-        println!("TODO");
+        println!("[!] Received tye Type::AddEdge message but edge node can't process it: {:?}", message);
         Ok(())
     }
 
     fn handle_remove(&mut self, message: &Message) -> Result<(), Box<dyn Error>> {
+        println!("[!] Received tye Type::Remove message but edge node can't process it: {:?}", message);
+        Ok(())
+    }
+    fn handle_ping(&self, _message: &Message) -> Result<(), Box<dyn Error>> {
         println!("TODO");
         Ok(())
     }
-    fn handle_ping(&self, message: &Message) -> Result<(), Box<dyn Error>> {
-        println!("TODO");
-        Ok(())
-    }
-    fn handle_nodes(&mut self, message: &Message) -> Result<(), Box<dyn Error>> {
+    fn handle_nodes(&mut self, _message: &Message) -> Result<(), Box<dyn Error>> {
         println!("TODO");
         Ok(())
     }
