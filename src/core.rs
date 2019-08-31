@@ -22,6 +22,7 @@ impl GenesisCoreNode {
     pub fn start(&mut self) {
         let message_handler_handle = self.core.start();
         let _health_check_handle = self.core.start_health_check();
+        let _health_check_handle_edge = self.core.start_health_check_edge();
 
         message_handler_handle.join().unwrap();;
     }
@@ -43,6 +44,7 @@ impl CoreNode {
     pub fn start(&mut self) {
         self.core.join_core_network(&self.genesis_node);
         let handle = self.core.start();
+        let _health_check_handle_edge = self.core.start_health_check_edge();
 
         handle.join().unwrap();
     }
@@ -92,6 +94,11 @@ impl Core {
 
     pub fn start_health_check(&self) -> HealthCheckHandle {
         let hc = HealthChecker::new(self.port.clone(), Arc::clone(&self.node_set));
+        hc.start()
+    }
+
+    pub fn start_health_check_edge(&self) -> HealthCheckHandle {
+        let hc = HealthChecker::new(self.port.clone(), Arc::clone(&self.edge_node_set));
         hc.start()
     }
 

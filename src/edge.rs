@@ -89,8 +89,8 @@ impl HandleMessage for EdgeMessageHandler {
         println!("[!] Received tye Type::Remove message but edge node can't process it: {:?}", message);
         Ok(())
     }
-    fn handle_ping(&self, _message: &Message) -> Result<(), Box<dyn Error>> {
-        println!("TODO");
+    fn handle_ping(&self, message: &Message) -> Result<(), Box<dyn Error>> {
+        println!("Received a ping message from the port: {}", message.source_port);
         Ok(())
     }
     fn handle_nodes(&mut self, _message: &Message) -> Result<(), Box<dyn Error>> {
