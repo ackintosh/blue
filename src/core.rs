@@ -6,6 +6,7 @@ use std::thread::JoinHandle;
 use crate::p2p::{JoinNetwork, HandleMessage, P2pNode};
 use crate::stringify;
 use std::error::Error;
+use crate::chain::Chain;
 
 
 pub struct GenesisCoreNode {
@@ -23,6 +24,7 @@ impl GenesisCoreNode {
         let message_handler_handle = self.core.start();
         let _health_check_handle = self.core.start_health_check();
         let _health_check_handle_edge = self.core.start_health_check_edge();
+        self.core.start_mining();
 
         message_handler_handle.join().unwrap();;
     }
@@ -45,6 +47,7 @@ impl CoreNode {
         self.core.join_core_network(&self.genesis_node);
         let handle = self.core.start();
         let _health_check_handle_edge = self.core.start_health_check_edge();
+        self.core.start_mining();
 
         handle.join().unwrap();
     }
@@ -56,6 +59,7 @@ struct Core {
     port: String,
     node_set: Arc<RwLock<NodeSet>>,
     edge_node_set: Arc<RwLock<NodeSet>>,
+    chain: Chain,
 }
 
 impl P2pNode for Core {
@@ -80,6 +84,7 @@ impl Core {
             port: port.clone(),
             node_set: Arc::new(RwLock::new(NodeSet::new())),
             edge_node_set: Arc::new(RwLock::new(NodeSet::new())),
+            chain: Chain::new(),
         }
     }
 
@@ -100,6 +105,10 @@ impl Core {
     pub fn start_health_check_edge(&self) -> HealthCheckHandle {
         let hc = HealthChecker::new(self.port.clone(), Arc::clone(&self.edge_node_set));
         hc.start()
+    }
+
+    pub fn start_mining(&self) {
+        println!("{:?}", self.chain);
     }
 
     fn join_core_network(&mut self, node: &Node) {
