@@ -10,6 +10,9 @@ pub mod edge;
 pub mod node;
 pub mod connection_manager;
 pub mod message;
+pub mod transaction;
+pub mod block;
+pub mod chain;
 
 pub fn stringify(x: impl ToString) -> String {
     x.to_string()
